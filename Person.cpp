@@ -12,8 +12,6 @@ Person::Person(string fname, string lname, string bdate){
     this->f_name=fname;
     this->l_name=lname;
     this->birthdate=new Date(bdate);
-    receive=1;
-    p=0.5;
 }
 
 
@@ -42,8 +40,6 @@ void Person::set_person(){
     getline(cin,x);
     this->birthdate=new Date(x);
     this->add_contact();
-    receive=1;
-    p=0.5;
 }
 
 
@@ -298,88 +294,4 @@ string Person::get_email()
         cin>>ind;
         return email[ind-1]->get_contact();
     }
-}
-
-string Person::get_all_emails()
-{
-    string e="";
-    for(int i=0;i<this->contacts.size();i++)
-    { 
-        if(this->contacts[i]->get_contact(true).find("Email")!=std::string::npos)
-        {
-            string temp=this->contacts[i]->get_contact();
-            temp=temp.substr(temp.find(")")+2);
-            e=e+" "+temp;
-        }
-    }
-    if(e=="")
-    {
-    	return "";
-    }
-    else
-    {
-    	return e.substr(1);
-    }
-}
-
-void Person::send_ad(map <string,int> ad)
-{
-
-	string emails=this->get_all_emails();
-    string ad_name=choose_ad(ad);
-    if((emails.size()==0)||(ad_name.size()==0))
-    {
-        return;
-    }
-    else
-    {
-        receive++;
-        sendEmail(emails,ad_name,"This is an advertisement. Reply if clicked; ignore if irrelevant");
-        cout<<"Is this ad relevent? (Y/N) ";
-        string i;
-        cin>>i;
-        if(i=="Y")
-        {
-        }
-        else
-        {
-           avoid.push_back(ad_name);
-        }
-    }
-}
-
-string Person::choose_ad(map <string,int> ad)
-{
-
-    auto temp=ad.begin();
-    float sum=0;
-    for(auto it=ad.begin();it!=ad.end();++it)
-    {
-
-        sum+=it->second;
-        if((temp->second)<(it->second))
-        {
-            if(find (avoid.begin(), avoid.end(), temp->first)!=avoid.end())
-            {
-                temp=it;
-            }
-        }
-    }
-    sum/=ad.size();
-
-
-    if(receive==9)
-    {
-        p=float(avoid.size())/receive;
-        if(p*temp->second>50*sum)
-        {
-            return temp->first;
-        }
-        else
-        {
-            return "";
-        }
-    }
-    
-
 }

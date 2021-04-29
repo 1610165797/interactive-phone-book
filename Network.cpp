@@ -4,9 +4,6 @@
 #include <fstream>
 #include <dirent.h>
 #include <limits>
-#include <map>
-#include <string>
-#include <iomanip>
 
 Network::Network(){
     // TODO
@@ -183,6 +180,31 @@ void Network::loadDB(string filename){
             }
         }
     }
+    /*
+    string line,f,l,b;
+    while(!infile.eof())
+    {
+    	getline(infile,line,'\n');
+    	if(line=="")
+    		{break;}
+    	for(int i=0;i<line.size();i++)
+    	{
+    		if(line.substr(i,1)==",")
+    		{
+    			l=line.substr(0,i);
+    			f=line.substr(i+2,line.size()-i-2);
+    		}
+    	}
+    	getline(infile,b,'\n');
+    	Person* temp=new Person(f,l,b);
+    	if(search(temp)==NULL)
+    	{
+    		push_back(temp);
+    	}
+    	getline(infile,line,'\n');
+    }
+    infile.close();
+    */
 }
 
 Network::Network(string fileName){
@@ -242,38 +264,6 @@ vector<Person*> Network::search(string fname,string lname){
     return list;
 }
 
-void Network::loadAD(string filename)
-{
-	string line;
-	ifstream infile(filename.c_str());
-	while(!infile.eof())
-	{
-		getline(infile,line);
-        ad.insert(pair<string,int>(line.substr(0,line.find(":")),stoi(line.substr(line.find(":")+1).c_str())));       
-    }   
-}
-
-void Network::printAD(string filename)
-{
-	string adver,profit;
-	int index =0; 
-	ifstream infile(filename.c_str());
-	while(!infile.eof())
-	{
-		getline(infile,adver);
-		getline(infile,profit);
-		ad.insert(pair<string,int>(adver,stoi(profit.c_str())));
-	}
-	//Prints out ads
-	/*
-	for (const auto& x : ad) {  
-        cout << "\t [" << index+1 << "] " << x.first;
-        cout << setw(6) << x.second << '\n';
-        index++; 
-    }
-    */
-}
-
 void Network::showMenu(){
     int opt;
     while(1){
@@ -286,9 +276,7 @@ void Network::showMenu(){
         cout << "4. Remove a person \n";
         cout << "5. Search & Modify \n";
         cout << "6. Print database \n";
-        cout << "7. Send email \n";
-        cout << "8. Load advertisement database \n";
-        cout << "9. Send advertisements \n";
+        cout << "7. Send Email \n";
         cout << "0. Quit \n";
         cout << "\nSelect an option ... ";
         
@@ -302,10 +290,11 @@ void Network::showMenu(){
             return;
         }
 
-        string fname, lname, bdate;
+        string fname, lname, fileName, bdate;
         cout << "\033[2J\033[1;1H";
 
         if (opt==1){ 
+            // Already done! 
             cout << "Saving network database \n";
             cout << "Enter the name of the save file: ";
             cin >> fileName;
@@ -313,7 +302,9 @@ void Network::showMenu(){
             cout << "Network saved in " << fileName << endl;
         }
         else if (opt==2){ 
+            // Already done! 
             cout << "Loading network database \n";
+            // Note: we added a nice feature to show the files in current directory
             DIR *dir;
             struct dirent *ent;
             if ((dir = opendir ("./")) != NULL) {
@@ -327,19 +318,21 @@ void Network::showMenu(){
                 }
                 closedir (dir);
             }
-            cout << "Enter the name of the phonebook database: ";
+            cout << "Enter the name of the load file: ";
             cin >> fileName;
             ifstream check(fileName.c_str());
             if (! bool(check))
                 cout << "Warning! File does not exist! \n";
             else {
                 loadDB(fileName);
-                cout << "Network loaded from " << fileName << " with " << count << " items \n \n";
+                cout << "Network loaded from " << fileName << " with " << count << " items \n";
             }
-
-            
         }
         else if (opt == 3){
+            // TODO
+            // Prompt and get the information of a new Person
+            // You need to make sure this item does not already exists!
+            // If it does not exist, push it to the front of the LL
             string f,l,b;
             cout << "Adding a new item (push front)\n";
             cout << "First name: ";
@@ -363,6 +356,7 @@ void Network::showMenu(){
             
         }
         else if (opt == 4){
+            // TODO 
             string f,l,b;
             cout << "Removing an item \n";
             cout << "First name: ";
@@ -371,6 +365,8 @@ void Network::showMenu(){
             getline(cin,l);
             cout << "Birthdate: ";
             getline(cin,b);
+            // If found and removed successfully: cout << "Remove Successful! \n";
+            // else: cout << "Person not found! \n";
             if(this->remove(f,l,b)==true)
             {
             	cout << "Remove Successful! \n";
@@ -459,7 +455,6 @@ void Network::showMenu(){
                 }
                 string addr,subject,content;
                 addr=list[index-1]->get_email();
-                addr=addr.substr(addr.find(")")+2);
                 if(addr=="")
                 {
                 	cout<<"This person doesn't have an email \n";
@@ -474,48 +469,11 @@ void Network::showMenu(){
 	                sendEmail(addr, subject, content);
 	            }
             }
-        }
 
-        else if(opt==8)
-        {
-            cout << "Loading network database \n";
-            DIR *dir;
-            struct dirent *ent;
-            if ((dir = opendir ("./")) != NULL) {
-                string str;
-                while ((ent = readdir (dir)) != NULL) {
-                    str = ent->d_name;
-                    if (str.size() > 3){
-                        if (str.substr(str.size()-3) == ".db")
-                            cout << str << endl;
-                    }
-                }
-                closedir (dir);
-            }
-            cout << "Enter the name of the advertisement database: ";
-            cin >> fileName;
-            cin.ignore();
-            ifstream check1(fileName.c_str());
-            if (! bool(check1))
-                cout << "Warning! File does not exist! \n";
-            else {
-                loadAD(fileName);
-                cout << "Advertisements loaded from " << fileName << " with " << ad.size() << " items \n";
-            }
-
-        }
-        else if(opt==9)
-        {
-        	Person* current_person=this->head; 
-        	while(current_person!=NULL)
-            {
-
-                current_person->send_ad(ad); 
-        		current_person=current_person->next; 
-        	}
         }
 
         else if (opt==0){
+            // QUIT!
             return;
         }
         else

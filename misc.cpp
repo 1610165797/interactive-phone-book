@@ -47,6 +47,8 @@ void sendEmail(string addr, string subject, string content, string attachment){
     // TODO: You need to add double quotation character (") to both sides of strings for this command. Adding other characters (like ? in code below) should be easy, but double quotation says: I'm a character but not a typical character! 
     // string new_str = '?' + old_str + '?'
     // TODO: Complete this method
+
+    addr = "\"" + addr + "\"";
     content = "\"" + content + "\"";
     subject = "\"" + subject + "\"";
     string cmd;

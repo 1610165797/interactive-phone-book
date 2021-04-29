@@ -5,7 +5,6 @@
 #include "Person.h"
 #include "Date.h"
 #include <stdlib.h>
-
 class Network{
 
     private:
@@ -14,8 +13,7 @@ class Network{
         int count; 
         Person* search(Person* searchEntry); 
         Person* search(string fname, string lname, string bd);
-        map <string,int> ad;
-        string fileName; 
+
     public:
         Network();
         Network(string fileName);
@@ -28,8 +26,7 @@ class Network{
         void printDB();
         void showMenu();
         vector<Person*> search(string fname, string lname);
-        void loadAD(string filename);
-        void printAD(string filename);
+        
 };
 
 #endif
