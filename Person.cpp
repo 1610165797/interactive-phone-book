@@ -2,51 +2,46 @@
 #include "Person.h"
 #include <limits>
 
-Person::Person(){
-    // Already Done! :) 
+Person::Person()
+{
     set_person();
 }
 
-Person::Person(string fname, string lname, string bdate){
-    // TODO
+Person::Person(string fname, string lname, string bdate)
+{
     this->f_name=fname;
     this->l_name=lname;
     this->birthdate=new Date(bdate);
+    receive=1;
+    p=0.5;
 }
 
 
-Person::~Person(){
-    // TODO
+Person::~Person()
+{
     delete birthdate;
 }
 
 
-void Person::set_person(){
-    //TODO
-    // prompts for the information of the user
-    // first/last name can have spaces!
-    // date format must be "M/D/YYYY", but user can make mistakes
-    // OOP: the one who wrote the Date class did take care of handling mistakes 
+void Person::set_person()
+{
     delete birthdate;
 	cout << "First Name: ";
-    // TODO: read the first name 
     getline(cin,this->f_name);
 	cout << "Last Name: ";
-    // TODO: read the last name
     getline(cin,this->l_name);
     cout << "Birthdate (M/D/YYYY): ";
-    // TODO: get birthdate from user as a string and use it to create a new Date (dynamic allocation)
     string x;
     getline(cin,x);
     this->birthdate=new Date(x);
     this->add_contact();
+    receive=1;
+    p=0.5;
 }
 
 
-bool Person::operator==(const Person& rhs){
-    // TODO
-    // Hint: Look at how we overloaded == in Date
-    // Two persons are equal only if they have the same first name, last name and date of birth! 
+bool Person::operator==(const Person& rhs)
+{
     if((this->f_name==rhs.f_name)&&(this->l_name==rhs.l_name)&&((*(this->birthdate))==(*(rhs.birthdate))))
     {
         return true;
@@ -58,16 +53,14 @@ bool Person::operator==(const Person& rhs){
 }
 
 
-bool Person::operator!=(const Person& rhs){ 
-    // TODO
-    // Hint: two things are either equal or not equal 
-
+bool Person::operator!=(const Person& rhs)
+{
     return (!(*(this)==rhs));
 }
 
 
-void Person::print_person(bool add){
-    // Already done!
+void Person::print_person(bool add)
+{
 	cout << l_name <<", " << f_name << endl;
 	birthdate->print_date("Month D, YYYY");
 	for(int i=0;i<contacts.size();i++)
@@ -293,5 +286,89 @@ string Person::get_email()
         int ind;
         cin>>ind;
         return email[ind-1]->get_contact();
+    }
+}
+
+string Person::get_all_emails()
+{
+    string e="";
+    for(int i=0;i<this->contacts.size();i++)
+    { 
+        if(this->contacts[i]->get_contact(true).find("Email")!=std::string::npos)
+        {
+            string temp=this->contacts[i]->get_contact();
+            temp=temp.substr(temp.find(")")+2);
+            e=e+" "+temp;
+        }
+    }
+    if(e=="")
+    {
+    	return "";
+    }
+    else
+    {
+    	return e.substr(1);
+    }
+}
+
+void Person::send_ad(map <string,int> ad)
+{
+
+	string emails=this->get_all_emails();
+    string ad_name=choose_ad(ad);
+    if((emails.size()==0)||(ad_name.size()==0))
+    {
+        return;
+    }
+    else
+    {
+    	string content="Dear "+this->f_name+" "+this->l_name+", \n\n"+"This is an advertisement from "+ad_name+".\n\n"+"Best Regards,\n\n"+ad_name;
+        receive++;
+        sendEmail(emails,ad_name,content);
+        cout<<ad_name<<" ad sent to "<<f_name<<" "<<l_name<<". Is this ad relevent? (Y/N) ";
+        string i;
+        cin>>i;
+        if(i=="Y")
+        {
+        }
+        else
+        {
+           this->avoid.push_back(ad_name);
+        }
+    }
+}
+
+string Person::choose_ad(map <string,int> ad)
+{
+
+    auto temp=ad.begin();
+    float sum=0;
+    for(auto it=temp;it!=ad.end();++it)
+    {
+        sum+=it->second;
+        if(find(avoid.begin(),avoid.end(),it->first)==end(avoid))
+        {
+        	if((temp->second)<(it->second))
+        	{
+        		temp=it;
+        	}
+        }
+    }
+    sum/=ad.size();
+    if(receive==10)
+    {
+        p=float(avoid.size())/receive;
+        if(p*temp->second>50*sum)
+        {
+            return temp->first;
+        }
+        else
+        {
+            return "";
+        }
+    }
+    else
+    {
+    	return temp->first;
     }
 }
